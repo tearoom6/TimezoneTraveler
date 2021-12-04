@@ -1,0 +1,9 @@
+{
+  "name": "TimezoneTraveler",
+  "version": "1.0.0",
+  "description": "browser extension to convert time between timezones",
+  "main": "index.js",
+  "repository": "https://github.com/tearoom6/TimezoneTraveler",
+  "author": "tearoom6",
+  "license": "MIT"
+}
