@@ -3,7 +3,6 @@ import { parseDateString, formatWithTimezone } from './dateUtils'
 chrome.runtime.onInstalled.addListener(() => {
   // TODO: Should be user preferences.
   const targetTimezones = ["Asia/Tokyo", "Europe/London", "America/New_York"]
-  const convertedSelections: string[] = []
 
   chrome.contextMenus.removeAll()
   chrome.contextMenus.create({
@@ -31,7 +30,10 @@ chrome.runtime.onInstalled.addListener(() => {
   })
 
   chrome.contextMenus.onClicked.addListener(
-    (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
+    async (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
+      const storageResults = await chrome.storage.local.get(["convertedSelections"])
+      const convertedSelections: string[] = storageResults.convertedSelections || []
+
       const menuItemId = info.menuItemId.toString()
       if (menuItemId === "TimezoneTravelerConvert") {
         try {
@@ -41,7 +43,7 @@ chrome.runtime.onInstalled.addListener(() => {
           }
           if (convertedSelections.includes(currentSelection)) {
             console.warn(`Already converted: ${currentSelection}`)
-            return
+            chrome.contextMenus.remove(currentSelection)
           }
 
           const targetDate = parseDateString(currentSelection)
@@ -62,7 +64,10 @@ chrome.runtime.onInstalled.addListener(() => {
               "contexts": ["all"],
             })
           })
-          convertedSelections.push(currentSelection)
+          if (!convertedSelections.includes(currentSelection)) {
+            convertedSelections.push(currentSelection)
+            await chrome.storage.local.set({ convertedSelections: convertedSelections })
+          }
         } catch (error) {
           console.warn(error)
           return
@@ -77,8 +82,13 @@ chrome.runtime.onInstalled.addListener(() => {
             chrome.contextMenus.remove(removedMenuItemId)
           }
         }
+        await chrome.storage.local.remove(["convertedSelections"])
         return
       }
     }
   )
 })
+
+chrome.runtime.onSuspend.addListener(() => {
+  console.log("Unloading.");
+});
