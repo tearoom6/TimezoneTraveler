@@ -64,7 +64,7 @@ chrome.runtime.onInstalled.addListener(() => {
           })
           convertedSelections.push(currentSelection)
         } catch (error) {
-          console.error(error)
+          console.warn(error)
           return
         }
         return
