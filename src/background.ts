@@ -102,6 +102,10 @@ chrome.contextMenus.onClicked.addListener(
             "contexts": ["all"],
           })
         })
+        const storageResults = await chrome.storage.local.get(["convertedSelections"])
+        const convertedSelections: string[] = storageResults.convertedSelections || []
+        convertedSelections.push(targetDateString)
+        await chrome.storage.local.set({ convertedSelections: convertedSelections })
       } catch (error) {
         console.warn(error)
         return
