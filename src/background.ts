@@ -18,6 +18,12 @@ chrome.runtime.onInstalled.addListener(() => {
   })
   chrome.contextMenus.create({
     "parentId": "TimezoneTravelerRoot",
+    "id": "TimezoneTravelerConvertNow",
+    "title": "For current time",
+    "contexts": ["all"],
+  })
+  chrome.contextMenus.create({
+    "parentId": "TimezoneTravelerRoot",
     "id": "TimezoneTravelerClearAll",
     "title": "Clear all",
     "contexts": ["all"],
@@ -69,6 +75,33 @@ chrome.contextMenus.onClicked.addListener(
           convertedSelections.push(currentSelection)
           await chrome.storage.local.set({ convertedSelections: convertedSelections })
         }
+      } catch (error) {
+        console.warn(error)
+        return
+      }
+      return
+    }
+
+    if (menuItemId === "TimezoneTravelerConvertNow") {
+      try {
+        const targetDate = new Date()
+        const targetDateString = targetDate.toLocaleString()
+        chrome.contextMenus.create({
+          "parentId": "TimezoneTravelerRoot",
+          "id": targetDateString,
+          "title": `Now (${targetDateString})`,
+          "contexts": ["all"],
+        })
+
+        targetTimezones.forEach((targetTimezone) => {
+          const timezoneDateString = formatWithTimezone(targetDate, targetTimezone)
+          chrome.contextMenus.create({
+            "parentId": targetDateString,
+            "id": `result-${targetDateString}-${targetTimezone}`,
+            "title": `${timezoneDateString} (${targetTimezone})`,
+            "contexts": ["all"],
+          })
+        })
       } catch (error) {
         console.warn(error)
         return
